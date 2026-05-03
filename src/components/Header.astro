@@ -4,16 +4,16 @@
 
 <header class="site-header">
   <div class="container header-container">
-    <a href="/" class="site-title">
+    <a href={`${import.meta.env.BASE_URL}/`} class="site-title">
       <span class="icon">🎣</span>
       <span class="text">Fishing Log</span>
     </a>
     
     <nav class="site-nav">
       <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/diary">Diary</a></li>
-        <li><a href="/gear">Gear</a></li>
+        <li><a href={`${import.meta.env.BASE_URL}/`}>Home</a></li>
+        <li><a href={`${import.meta.env.BASE_URL}/diary`}>Diary</a></li>
+        <li><a href={`${import.meta.env.BASE_URL}/gear`}>Gear</a></li>
       </ul>
     </nav>
   </div>

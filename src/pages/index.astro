@@ -21,8 +21,8 @@ const latestGear = allGear.slice(0, 3);
       <h1>Fishing Log</h1>
       <p>A personal record of fishing adventures, gear, and memories.</p>
       <div class="hero-actions">
-        <a href="/diary" class="btn btn-primary">Read Diary</a>
-        <a href="/gear" class="btn btn-secondary">Explore Gear</a>
+        <a href={`${import.meta.env.BASE_URL}/diary`} class="btn btn-primary">Read Diary</a>
+        <a href={`${import.meta.env.BASE_URL}/gear`} class="btn btn-secondary">Explore Gear</a>
       </div>
     </div>
   </section>
@@ -31,7 +31,7 @@ const latestGear = allGear.slice(0, 3);
     <div class="container">
       <div class="section-header">
         <h2>Latest Adventures</h2>
-        <a href="/diary" class="view-all">View all →</a>
+        <a href={`${import.meta.env.BASE_URL}/diary`} class="view-all">View all →</a>
       </div>
       
       {latestDiaries.length > 0 ? (
@@ -50,7 +50,7 @@ const latestGear = allGear.slice(0, 3);
     <div class="container">
       <div class="section-header">
         <h2>Featured Gear</h2>
-        <a href="/gear" class="view-all">View all →</a>
+        <a href={`${import.meta.env.BASE_URL}/gear`} class="view-all">View all →</a>
       </div>
       
       {latestGear.length > 0 ? (

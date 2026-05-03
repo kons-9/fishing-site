@@ -34,7 +34,7 @@ const usedGear = gear ? await getEntries(gear) : [];
 <BaseLayout title={`釣行記: ${location}`} description={`${formattedDate} - ${location}での釣行記録。狙い: ${target}`}>
   <div class="container diary-detail">
     <div class="back-link">
-      <a href="/diary">← Back to Diary List</a>
+      <a href={`${import.meta.env.BASE_URL}/diary`}>← Back to Diary List</a>
     </div>
 
     <header class="detail-header">

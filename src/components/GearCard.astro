@@ -25,7 +25,7 @@ const categoryLabel = categoryLabels[category] || category;
 const searchData = [name, brand, categoryLabel, ...targetFish].filter(Boolean).join(' ').toLowerCase();
 ---
 
-<a href={`/gear/${gear.id}`} class="gear-card" data-category={category} data-search={searchData}>
+<a href={`${import.meta.env.BASE_URL}/gear/${gear.id}`} class="gear-card" data-category={category} data-search={searchData}>
   <div class="card-content">
     <div class="main-info">
       <span class="brand">{brand || 'メーカー不明'}</span>

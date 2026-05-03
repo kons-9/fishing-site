@@ -30,7 +30,7 @@ const categoryLabel = categoryLabels[category] || category;
 <BaseLayout title={name} description={`${brand || ''} ${name} - ${categoryLabel}`}>
   <div class="container gear-detail">
     <div class="back-link">
-      <a href="/gear">← Back to Gear List</a>
+      <a href={`${import.meta.env.BASE_URL}/gear`}>← Back to Gear List</a>
     </div>
 
     <header class="detail-header">

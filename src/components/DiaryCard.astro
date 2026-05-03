@@ -23,7 +23,7 @@ const catchSummary = catches.length > 0
   : 'ボウズ';
 ---
 
-<a href={`/diary/${entry.id}`} class="diary-card">
+<a href={`${import.meta.env.BASE_URL}/diary/${entry.id}`} class="diary-card">
   <div class="date-badge">
     <span class="day">{date.getDate()}</span>
     <span class="month-year">{date.getFullYear()}/{date.getMonth() + 1}</span>
