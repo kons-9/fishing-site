@@ -1,0 +1,48 @@
+---
+// src/pages/diary/index.astro
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DiaryCard from '../../components/DiaryCard.astro';
+
+const allEntries = await getCollection('diary');
+// Sort by date descending
+allEntries.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Diary" description="My fishing log and adventures.">
+  <div class="container diary-page">
+    <header class="page-header">
+      <h1>Fishing Diary</h1>
+      <p>Records of past fishing trips, weather conditions, and catches.</p>
+    </header>
+
+    <div class="timeline">
+      {allEntries.map(entry => (
+        <DiaryCard entry={entry} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .diary-page {
+    padding: var(--space-xl) var(--space-md);
+    max-width: 800px;
+  }
+
+  .page-header {
+    margin-bottom: var(--space-xl);
+    text-align: center;
+  }
+
+  .page-header p {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+</style>

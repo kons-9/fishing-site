@@ -1,0 +1,109 @@
+---
+// src/components/GearCard.astro
+import type { CollectionEntry } from 'astro:content';
+import TagBadge from './TagBadge.astro';
+
+interface Props {
+  gear: CollectionEntry<'gear'>;
+}
+
+const { gear } = Astro.props;
+const { name, category, targetFish, brand } = gear.data;
+
+// Map category to readable label
+const categoryLabels: Record<string, string> = {
+  rod: 'ロッド',
+  reel: 'リール',
+  lure: 'ルアー',
+  rig: '仕掛け',
+  wear: 'ウェア',
+  accessory: '小物'
+};
+const categoryLabel = categoryLabels[category] || category;
+
+// Stringify data for fuzzy search data attributes
+const searchData = [name, brand, categoryLabel, ...targetFish].filter(Boolean).join(' ').toLowerCase();
+---
+
+<a href={`/gear/${gear.id}`} class="gear-card" data-category={category} data-search={searchData}>
+  <div class="card-content">
+    <div class="main-info">
+      <span class="brand">{brand || 'メーカー不明'}</span>
+      <h3 class="name">{name}</h3>
+    </div>
+    <div class="tags-info">
+      <TagBadge text={categoryLabel} variant="primary" />
+      <div class="targets">
+        {targetFish.map((fish: string) => (
+          <TagBadge text={fish} variant="default" />
+        ))}
+      </div>
+    </div>
+  </div>
+</a>
+
+<style>
+  .gear-card {
+    display: block;
+    background-color: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+    border: 1px solid var(--color-border);
+  }
+
+  .gear-card:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-light);
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  @media (min-width: 640px) {
+    .card-content {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  .main-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .brand {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .name {
+    font-size: 1.15rem;
+    margin: 0;
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  .tags-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .targets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+</style>

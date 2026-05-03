@@ -1,0 +1,293 @@
+---
+// src/pages/diary/[id].astro
+import { getCollection, getEntries, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GearCard from '../../components/GearCard.astro';
+
+export async function getStaticPaths() {
+  const diaryEntries = await getCollection('diary');
+  return diaryEntries.map(entry => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { date, startDate, endDate, timeRange, location, target, catches, tide, weather, temperature, wind, hitLure, gear } = entry.data;
+
+const formatDate = (d: Date) => new Intl.DateTimeFormat('ja-JP', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  weekday: 'long'
+}).format(d);
+
+const formattedDate = (startDate && endDate)
+  ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
+  : formatDate(date);
+
+// Resolve gear references
+const usedGear = gear ? await getEntries(gear) : [];
+---
+
+<BaseLayout title={`釣行記: ${location}`} description={`${formattedDate} - ${location}での釣行記録。狙い: ${target}`}>
+  <div class="container diary-detail">
+    <div class="back-link">
+      <a href="/diary">← Back to Diary List</a>
+    </div>
+
+    <header class="detail-header">
+      <div class="date-location">
+        <span class="date">{formattedDate}</span>
+        <span class="time">{timeRange}</span>
+      </div>
+      <h1>📍 {location}</h1>
+      <p class="target-badge">狙い: <strong>{target}</strong></p>
+    </header>
+
+    <div class="detail-grid">
+      <div class="main-content">
+        <section class="prose">
+          <h2>釣行の振り返り</h2>
+          <Content />
+        </section>
+
+        {usedGear.length > 0 && (
+          <section class="gear-section">
+            <h2>使用タックル</h2>
+            <div class="gear-grid">
+              {usedGear.map(g => (
+                <GearCard gear={g} />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <aside class="sidebar">
+        <div class="info-card catches-card">
+          <h3>🎣 釣果</h3>
+          {catches && catches.length > 0 ? (
+            <ul class="catch-list">
+              {catches.map((c: any) => (
+                <li>
+                  <span class="species">{c.species}</span>
+                  <span class="details">
+                    {c.size && <span class="size">{c.size}</span>}
+                    <span class="count">× {c.count}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="text-muted">ボウズ... 次回に期待！</p>
+          )}
+          {hitLure && (
+            <div class="hit-lure">
+              <strong>ヒットルアー:</strong> {hitLure}
+            </div>
+          )}
+        </div>
+
+        <div class="info-card conditions-card">
+          <h3>⛅ コンディション</h3>
+          <dl class="condition-list">
+            <div class="cond-item">
+              <dt>天気</dt>
+              <dd>{weather || '-'}</dd>
+            </div>
+            <div class="cond-item">
+              <dt>潮回り</dt>
+              <dd>
+                {tide.type} 
+                {tide.flow && <span class="flow">({tide.flow})</span>}
+              </dd>
+            </div>
+            {temperature && (
+              <div class="cond-item">
+                <dt>気温 / 水温</dt>
+                <dd>
+                  {temperature.air ? `${temperature.air}℃` : '-'} / 
+                  {temperature.water ? `${temperature.water}℃` : '-'}
+                </dd>
+              </div>
+            )}
+            {wind && (
+              <div class="cond-item">
+                <dt>風</dt>
+                <dd>
+                  {wind.direction || ''} {wind.speed ? `${wind.speed}m/s` : '-'}
+                </dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .diary-detail {
+    padding: var(--space-xl) var(--space-md);
+    max-width: 1000px;
+  }
+
+  .back-link {
+    margin-bottom: var(--space-lg);
+  }
+
+  .back-link a {
+    font-weight: 500;
+    color: var(--color-text-muted);
+  }
+
+  .back-link a:hover {
+    color: var(--color-primary);
+  }
+
+  .detail-header {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+    text-align: center;
+  }
+
+  .date-location {
+    color: var(--color-primary-dark);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .detail-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-md);
+  }
+
+  .target-badge {
+    display: inline-block;
+    background: var(--color-bg-card);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 768px) {
+    .detail-grid {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
+  .prose {
+    line-height: 1.8;
+    margin-bottom: var(--space-xl);
+  }
+
+  .prose h2 {
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-md);
+  }
+
+  .gear-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
+  }
+
+  .gear-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .info-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .info-card h3 {
+    margin-bottom: var(--space-sm);
+    font-size: 1.2rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+  }
+
+  .catch-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .catch-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px dashed var(--color-border);
+  }
+
+  .catch-list .species {
+    font-weight: 600;
+  }
+
+  .catch-list .details {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .catch-list .size {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .hit-lure {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.9rem;
+  }
+
+  .condition-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .cond-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px dashed var(--color-border);
+    padding-bottom: var(--space-xs);
+  }
+
+  .cond-item dt {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .cond-item dd {
+    font-weight: 500;
+    text-align: right;
+  }
+
+  .flow {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,190 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DiaryCard from '../components/DiaryCard.astro';
+import GearCard from '../components/GearCard.astro';
+
+// Fetch and sort data
+const allDiaries = await getCollection('diary');
+const latestDiaries = allDiaries
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const allGear = await getCollection('gear');
+// For simplicity, just show the latest added gears (or first 3)
+const latestGear = allGear.slice(0, 3);
+---
+
+<BaseLayout title="Home">
+  <section class="hero">
+    <div class="container hero-container">
+      <h1>Fishing Log</h1>
+      <p>A personal record of fishing adventures, gear, and memories.</p>
+      <div class="hero-actions">
+        <a href="/diary" class="btn btn-primary">Read Diary</a>
+        <a href="/gear" class="btn btn-secondary">Explore Gear</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="recent-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Latest Adventures</h2>
+        <a href="/diary" class="view-all">View all →</a>
+      </div>
+      
+      {latestDiaries.length > 0 ? (
+        <div class="card-grid diary-grid">
+          {latestDiaries.map(diary => (
+            <DiaryCard entry={diary} />
+          ))}
+        </div>
+      ) : (
+        <p class="placeholder">No fishing logs yet.</p>
+      )}
+    </div>
+  </section>
+
+  <section class="recent-section bg-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2>Featured Gear</h2>
+        <a href="/gear" class="view-all">View all →</a>
+      </div>
+      
+      {latestGear.length > 0 ? (
+        <div class="card-list gear-list">
+          {latestGear.map(gear => (
+            <GearCard gear={gear} />
+          ))}
+        </div>
+      ) : (
+        <p class="placeholder">No gear added yet.</p>
+      )}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding: var(--space-xl) 0;
+    text-align: center;
+    background: var(--gradient-ocean);
+    color: white;
+  }
+
+  .hero h1 {
+    color: white;
+    font-size: 3.5rem;
+    margin-bottom: var(--space-md);
+    letter-spacing: -0.03em;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 0 auto var(--space-lg);
+    opacity: 0.9;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    color: white;
+  }
+
+  .btn-secondary {
+    background-color: white;
+    color: var(--color-primary-dark);
+  }
+
+  .btn-secondary:hover {
+    color: var(--color-primary-dark);
+  }
+
+  .recent-section {
+    padding: var(--space-xl) 0;
+  }
+
+  .bg-alt {
+    background-color: var(--color-bg-card);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-lg);
+  }
+
+  .view-all {
+    font-weight: 500;
+  }
+
+  .card-grid {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .diary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  @media (min-width: 1024px) {
+    .diary-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .placeholder {
+    color: var(--color-text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: var(--space-xl);
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .btn-secondary {
+      background-color: var(--color-bg-dark);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    .bg-alt {
+      background-color: hsl(210, 20%, 12%);
+    }
+  }
+</style>

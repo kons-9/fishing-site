@@ -1,0 +1,310 @@
+---
+// src/pages/gear/[id].astro
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagBadge from '../../components/TagBadge.astro';
+
+export async function getStaticPaths() {
+  const gearEntries = await getCollection('gear');
+  return gearEntries.map(gear => ({
+    params: { id: gear.id },
+    props: { gear },
+  }));
+}
+
+const { gear } = Astro.props;
+const { Content } = await render(gear);
+const { name, category, targetFish, brand, specs, lineCapacity, spools, review, rating, price, purchaseDate } = gear.data;
+
+const categoryLabels: Record<string, string> = {
+  rod: 'ロッド',
+  reel: 'リール',
+  lure: 'ルアー',
+  rig: '仕掛け',
+  wear: 'ウェア',
+  accessory: 'アクセサリー'
+};
+const categoryLabel = categoryLabels[category] || category;
+---
+
+<BaseLayout title={name} description={`${brand || ''} ${name} - ${categoryLabel}`}>
+  <div class="container gear-detail">
+    <div class="back-link">
+      <a href="/gear">← Back to Gear List</a>
+    </div>
+
+    <header class="detail-header">
+      <div class="header-tags">
+        <span class="brand">{brand || 'メーカー不明'}</span>
+        <TagBadge text={categoryLabel} variant="primary" />
+      </div>
+      <h1>{name}</h1>
+      <div class="target-tags">
+        {targetFish.map((fish: string) => (
+          <TagBadge text={fish} variant="default" />
+        ))}
+      </div>
+    </header>
+
+    <div class="detail-grid">
+      <div class="main-content">
+        <div class="image-placeholder">
+          <span class="icon">{category === 'rod' ? '🎣' : category === 'reel' ? '⚙️' : '🐟'}</span>
+          <p>No Photo Available</p>
+        </div>
+
+        <div class="prose">
+          <h2>About this Gear</h2>
+          <Content />
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="info-card">
+          <h3>Specifications</h3>
+          {specs ? (
+            <dl class="specs-list">
+              {Object.entries(specs).map(([key, value]) => (
+                <div class="spec-item">
+                  <dt>{key}</dt>
+                  <dd>{String(value)}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p class="text-muted">No specifications recorded.</p>
+          )}
+        </div>
+
+        {lineCapacity && lineCapacity.length > 0 && (
+          <div class="info-card">
+            <h3>Line Capacity</h3>
+            <ul class="line-list">
+              {lineCapacity.map(line => (
+                <li>
+                  <span class="line-type">{line.lineType}</span>
+                  <span class="line-thickness">{line.thickness}</span>
+                  {line.length && <span class="line-length">({line.length})</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {spools && spools.length > 0 && (
+          <div class="info-card">
+            <h3>Spools & Current Line</h3>
+            <div class="spool-list">
+              {spools.map(spool => (
+                <div class="spool-item">
+                  <h4>{spool.name}</h4>
+                  {spool.currentLine ? (
+                    <div class="current-line">
+                      <p>
+                        <strong>{spool.currentLine.lineType} {spool.currentLine.thickness}</strong> 
+                        {spool.currentLine.length && ` (${spool.currentLine.length})`}
+                      </p>
+                      {spool.currentLine.memo && <p class="memo text-muted">{spool.currentLine.memo}</p>}
+                    </div>
+                  ) : (
+                    <p class="text-muted">No line wound.</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {(rating || review) && (
+          <div class="info-card">
+            <h3>Review</h3>
+            {rating && <div class="rating">{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</div>}
+            {review && <p>{review}</p>}
+          </div>
+        )}
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .gear-detail {
+    padding: var(--space-xl) var(--space-md);
+    max-width: 1000px;
+  }
+
+  .back-link {
+    margin-bottom: var(--space-lg);
+  }
+
+  .back-link a {
+    font-weight: 500;
+    color: var(--color-text-muted);
+  }
+
+  .back-link a:hover {
+    color: var(--color-primary);
+  }
+
+  .detail-header {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .header-tags {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .brand {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
+  .detail-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .target-tags {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 768px) {
+    .detail-grid {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
+  .image-placeholder {
+    background: var(--gradient-ocean);
+    height: 300px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-bottom: var(--space-lg);
+    opacity: 0.9;
+  }
+
+  .image-placeholder .icon {
+    font-size: 5rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .info-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .info-card h3 {
+    margin-bottom: var(--space-sm);
+    font-size: 1.2rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-xs);
+  }
+
+  .specs-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .spec-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px dashed var(--color-border);
+    padding-bottom: var(--space-xs);
+  }
+
+  .spec-item dt {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .spec-item dd {
+    font-weight: 500;
+    text-align: right;
+  }
+  
+  .line-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  
+  .line-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) 0;
+    border-bottom: 1px dashed var(--color-border);
+  }
+  
+  .line-type {
+    font-weight: 600;
+    color: var(--color-primary-dark);
+  }
+  
+  .spool-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  
+  .spool-item {
+    background-color: var(--color-bg);
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+  }
+  
+  .spool-item h4 {
+    font-size: 0.95rem;
+    margin-bottom: var(--space-xs);
+    color: var(--color-text);
+  }
+  
+  .current-line p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+  
+  .current-line .memo {
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+  }
+
+  .rating {
+    color: var(--color-accent);
+    font-size: 1.25rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .prose {
+    line-height: 1.8;
+  }
+
+  .prose h2 {
+    font-size: 1.5rem;
+    margin-top: var(--space-lg);
+  }
+</style>

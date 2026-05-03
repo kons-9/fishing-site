@@ -1,0 +1,120 @@
+---
+// src/components/DiaryCard.astro
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'diary'>;
+}
+
+const { entry } = Astro.props;
+const { date, startDate, endDate, location, target, catches, weather } = entry.data;
+
+const formatDate = (d: Date) => new Intl.DateTimeFormat('ja-JP', {
+  month: 'short',
+  day: 'numeric',
+}).format(d);
+
+const dateRangeText = (startDate && endDate) 
+  ? `${formatDate(startDate)} - ${formatDate(endDate)}`
+  : null;
+
+const catchSummary = catches.length > 0 
+  ? catches.map(c => `${c.species} ${c.count}匹`).join(', ')
+  : 'ボウズ';
+---
+
+<a href={`/diary/${entry.id}`} class="diary-card">
+  <div class="date-badge">
+    <span class="day">{date.getDate()}</span>
+    <span class="month-year">{date.getFullYear()}/{date.getMonth() + 1}</span>
+  </div>
+  
+  <div class="card-content">
+    <div class="header-info">
+      <span class="location">📍 {location}</span>
+      {dateRangeText && <span class="date-range">📅 {dateRangeText}</span>}
+      {weather && <span class="weather">⛅ {weather}</span>}
+    </div>
+    
+    <h3 class="target">狙い: {target}</h3>
+    
+    <div class="catch-result">
+      <strong>釣果:</strong> {catchSummary}
+    </div>
+  </div>
+</a>
+
+<style>
+  .diary-card {
+    display: flex;
+    background-color: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    border: 1px solid var(--color-border);
+  }
+
+  .diary-card:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-light);
+  }
+
+  .date-badge {
+    background: var(--gradient-ocean);
+    color: white;
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+  }
+
+  .date-badge .day {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .date-badge .month-year {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    margin-top: var(--space-xs);
+  }
+
+  .card-content {
+    padding: var(--space-md);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .header-info {
+    display: flex;
+    gap: var(--space-md);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-xs);
+  }
+
+  .target {
+    font-size: 1.2rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .catch-result {
+    font-size: 0.95rem;
+    color: var(--color-primary-dark);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .catch-result {
+      color: var(--color-primary-light);
+    }
+  }
+</style>

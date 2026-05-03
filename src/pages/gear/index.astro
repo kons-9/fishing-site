@@ -1,0 +1,218 @@
+---
+// src/pages/gear/index.astro
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GearCard from '../../components/GearCard.astro';
+
+const allGear = await getCollection('gear');
+
+// Filter categories dynamically
+const categories = [...new Set(allGear.map(gear => gear.data.category))];
+const categoryLabels: Record<string, string> = {
+  rod: 'ロッド',
+  reel: 'リール',
+  lure: 'ルアー',
+  rig: '仕掛け',
+  wear: 'ウェア',
+  accessory: '小物'
+};
+---
+
+<BaseLayout title="Gear" description="My fishing gear collection.">
+  <div class="container gear-page">
+    <header class="page-header">
+      <h1>My Fishing Gear</h1>
+      <p>A complete list of rods, reels, and other equipment.</p>
+    </header>
+
+    <div class="controls-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="gear-search" placeholder="メーカー、モデル名、対象魚で検索..." autocomplete="off" />
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">すべて</button>
+        {categories.map(cat => (
+          <button class="filter-btn" data-filter={cat}>{categoryLabels[cat] || cat}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="gear-list" id="gear-list">
+      {allGear.map(gear => (
+        <GearCard gear={gear} />
+      ))}
+      <div id="no-results" class="no-results" style="display: none;">
+        <p>条件に一致する道具が見つかりません。</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // クライアントサイドでのフィルタリング＆検索処理
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const searchInput = document.getElementById('gear-search') as HTMLInputElement;
+    const cards = document.querySelectorAll('.gear-card');
+    const noResults = document.getElementById('no-results');
+
+    let currentCategory = 'all';
+    let currentSearch = '';
+
+    function updateList() {
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const cardCategory = card.getAttribute('data-category');
+        const searchData = card.getAttribute('data-search') || '';
+
+        const matchesCategory = currentCategory === 'all' || cardCategory === currentCategory;
+        const matchesSearch = currentSearch === '' || searchData.includes(currentSearch);
+
+        if (matchesCategory && matchesSearch) {
+          (card as HTMLElement).style.display = '';
+          visibleCount++;
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+
+      if (noResults) {
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+      }
+    }
+
+    // カテゴリフィルターのイベント
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.getAttribute('data-filter') || 'all';
+        updateList();
+      });
+    });
+
+    // 検索バーのイベント
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        currentSearch = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        updateList();
+      });
+    }
+  });
+</script>
+
+<style>
+  .gear-page {
+    padding: var(--space-xl) var(--space-md);
+    max-width: 900px; /* リスト表示なので幅を少し絞る */
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: var(--space-xl);
+    text-align: center;
+  }
+
+  .page-header p {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+  }
+
+  .controls-container {
+    background: var(--color-bg-card);
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-xl);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: 1rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    font-family: inherit;
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px hsl(200 70% 45% / 0.15);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .filter-btn {
+    background: transparent;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+  }
+
+  .filter-btn:hover {
+    color: var(--color-primary);
+    background: hsl(200 70% 45% / 0.05);
+  }
+
+  .filter-btn.active {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .gear-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .no-results {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--color-text-muted);
+    background: var(--color-bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--color-border);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .search-box input {
+      background: hsl(210, 25%, 8%);
+    }
+    .filter-btn:hover {
+      background: hsl(200 70% 45% / 0.15);
+    }
+  }
+</style>

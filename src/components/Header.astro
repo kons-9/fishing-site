@@ -1,0 +1,108 @@
+---
+// src/components/Header.astro
+---
+
+<header class="site-header">
+  <div class="container header-container">
+    <a href="/" class="site-title">
+      <span class="icon">🎣</span>
+      <span class="text">Fishing Log</span>
+    </a>
+    
+    <nav class="site-nav">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/diary">Diary</a></li>
+        <li><a href="/gear">Gear</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background-color: var(--color-bg-card);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 4rem;
+  }
+
+  .site-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-primary-dark);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+  
+  .site-title .icon {
+    font-size: 1.8rem;
+  }
+
+  .site-nav ul {
+    display: flex;
+    gap: var(--space-lg);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-nav a {
+    color: var(--color-text);
+    font-weight: 500;
+    text-decoration: none;
+    padding: var(--space-xs) 0;
+    position: relative;
+    transition: color var(--transition-fast);
+  }
+
+  .site-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--gradient-ocean);
+    transition: width var(--transition-normal);
+  }
+
+  .site-nav a:hover {
+    color: var(--color-primary);
+  }
+
+  .site-nav a:hover::after {
+    width: 100%;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .site-title {
+      color: var(--color-primary-light);
+    }
+    .site-nav a {
+      color: var(--color-text-muted);
+    }
+    .site-nav a:hover {
+      color: var(--color-text);
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .site-nav ul {
+      gap: var(--space-md);
+    }
+  }
+</style>
