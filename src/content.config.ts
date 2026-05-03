@@ -8,7 +8,8 @@ const gearCollection = defineCollection({
     category: z.enum([
       'rod', 'reel', 'lure', 'rig', 'wear', 'accessory'
     ]),
-    targetFish: z.array(z.string()),
+    bestTargets: z.array(z.string()),
+    possibleTargets: z.array(z.string()).default([]),
     brand: z.string().optional(),
     photo: image().optional(),
     specs: z.record(z.string()).optional(),

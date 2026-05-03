@@ -8,7 +8,7 @@ interface Props {
 }
 
 const { gear } = Astro.props;
-const { name, category, targetFish, brand } = gear.data;
+const { name, category, bestTargets, possibleTargets, brand } = gear.data;
 
 // Map category to readable label
 const categoryLabels: Record<string, string> = {
@@ -22,7 +22,7 @@ const categoryLabels: Record<string, string> = {
 const categoryLabel = categoryLabels[category] || category;
 
 // Stringify data for fuzzy search data attributes
-const searchData = [name, brand, categoryLabel, ...targetFish].filter(Boolean).join(' ').toLowerCase();
+const searchData = [name, brand, categoryLabel, ...bestTargets, ...possibleTargets].filter(Boolean).join(' ').toLowerCase();
 ---
 
 <a href={`${import.meta.env.BASE_URL}/gear/${gear.id}`} class="gear-card" data-category={category} data-search={searchData}>
@@ -33,10 +33,20 @@ const searchData = [name, brand, categoryLabel, ...targetFish].filter(Boolean).j
     </div>
     <div class="tags-info">
       <TagBadge text={categoryLabel} variant="primary" />
-      <div class="targets">
-        {targetFish.map((fish: string) => (
-          <TagBadge text={fish} variant="default" />
-        ))}
+      <div class="targets-container">
+        <div class="targets best">
+          {bestTargets.map((fish: string) => (
+            <TagBadge text={fish} variant="default" />
+          ))}
+        </div>
+        {possibleTargets.length > 0 && (
+          <div class="targets possible">
+            <span class="can-label">CAN:</span>
+            {possibleTargets.map((fish: string) => (
+              <span class="can-tag">{fish}</span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -101,9 +111,39 @@ const searchData = [name, brand, categoryLabel, ...targetFish].filter(Boolean).j
     flex-wrap: wrap;
   }
 
+  .targets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   .targets {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-xs);
+    align-items: center;
+  }
+
+  .possible {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  .can-label {
+    font-weight: 700;
+    margin-right: 4px;
+    font-size: 0.65rem;
+    background: var(--color-border);
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  .can-tag {
+    position: relative;
+  }
+
+  .can-tag:not(:last-child)::after {
+    content: ',';
+    margin-right: 4px;
   }
 </style>

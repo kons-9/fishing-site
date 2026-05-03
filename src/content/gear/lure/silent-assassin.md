@@ -1,7 +1,8 @@
 ---
 name: "サイレントアサシン 129F"
 category: "lure"
-targetFish: ["シーバス", "ヒラメ"]
+bestTargets: ["シーバス", "ヒラメ"]
+possibleTargets: ["サワラ", "アメマス", "サクラマス", "イナダ"]
 brand: "シマノ"
 specs:
   全長: "129mm"

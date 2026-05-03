@@ -1,7 +1,8 @@
 ---
 name: "デジタルスケール"
 category: "accessory"
-targetFish: ["全般"]
+bestTargets: ["全般"]
+possibleTargets: ["全般"]
 brand: "ダイワ"
 specs:
   最大計測: "25kg"

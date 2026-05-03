@@ -1,7 +1,8 @@
 ---
 name: "フィッシングプライヤー"
 category: "accessory"
-targetFish: ["全般"]
+bestTargets: ["全般"]
+possibleTargets: ["全般"]
 brand: "スミス"
 specs:
   素材: "ステンレス"

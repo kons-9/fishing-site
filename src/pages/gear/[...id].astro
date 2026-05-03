@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 
 const { gear } = Astro.props;
 const { Content } = await render(gear);
-const { name, category, targetFish, brand, specs, lineCapacity, spools, review, rating, price, purchaseDate } = gear.data;
+const { name, category, bestTargets, possibleTargets, brand, specs, lineCapacity, spools, review, rating, price, purchaseDate } = gear.data;
 
 const categoryLabels: Record<string, string> = {
   rod: 'ロッド',
@@ -39,10 +39,25 @@ const categoryLabel = categoryLabels[category] || category;
         <TagBadge text={categoryLabel} variant="primary" />
       </div>
       <h1>{name}</h1>
-      <div class="target-tags">
-        {targetFish.map((fish: string) => (
-          <TagBadge text={fish} variant="default" />
-        ))}
+      <div class="target-sections">
+        <div class="target-group">
+          <span class="label">Best Targets:</span>
+          <div class="target-tags">
+            {bestTargets.map((fish: string) => (
+              <TagBadge text={fish} variant="default" />
+            ))}
+          </div>
+        </div>
+        {possibleTargets.length > 0 && (
+          <div class="target-group possible">
+            <span class="label">Possible Targets (Can):</span>
+            <div class="target-tags">
+              {possibleTargets.map((fish: string) => (
+                <span class="can-tag">{fish}</span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </header>
 
@@ -170,10 +185,45 @@ const categoryLabel = categoryLabels[category] || category;
     margin-bottom: var(--space-sm);
   }
 
+  .target-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: center;
+  }
+
+  .target-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .target-group .label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .target-group.possible {
+    opacity: 0.8;
+  }
+
+  .can-tag {
+    background: var(--color-bg-card);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+
   .target-tags {
     display: flex;
     gap: var(--space-xs);
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   .detail-grid {
